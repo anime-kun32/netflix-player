@@ -5,86 +5,70 @@
     <meta charset="utf-8" />
     <link rel="icon" href="favicon.ico" />
     <link rel='manifest' href='manifest.webmanifest'>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="css.css">
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
- <div style="position:fixed; height:100%; width:100%; background-color: black;top:0;left:0; z-index:999; opacity: 0.8;" id="turn">
-    <img style="position: absolute;margin: auto;top: 0;left: 0;right: 0;bottom: 0; width:100%;" src="Animação-de-Rotação.gif" /><br>
-    </div>
-    <style>
-	@media only screen and (orientation:landscape){
-  #turn{ display:none; }
-}
-@media only screen and (orientation:portrait){
-  #turn{ display:block; }
-}
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body onkeydown="key()" onload="load_video()" class="naoSelecionavel">
+    
+    <div id="loading" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none;">
+        <img src="loading.png" alt="Loading..." style="width: 100px; height: 100px;">
+    </div>
 
     <div onmousemove="hover()" id="overlay">
         <div id="text">
-          <span style="font-size:20px;opacity: 0.5;" >você está assistindo a</span><br>
-          <span style="font-size:60px;" id="nome2" >Black Mirror</span>
-          </div> 
+            <span style="font-size:20px; opacity: 0.5;">Você está assistindo a</span><br>
+            <span style="font-size:60px;" id="nome2">Black Mirror</span>
+        </div>
     </div>
 
-<div onclick="play()">
-<video onmousemove="hover()"  autoplay id="myVideo" src="https://www.googleapis.com/drive/v3/files/1vIHuov5jaThUfZocNhUYhoWRBfLLuAdj?alt=media&key=AIzaSyBtft7ooUSu8n8a2iWxOKyBVtLUZ7twF0Q"></video>
-</div>
-<div onmousemove="hover()" id="content" class="content">
-    <div class="chrome">
-        <input type="range" min="0" onchange="video_time_update();hover();" oninput="video_time_update();hover()" value="0" id="video_slider"/>
+    <div onclick="play()">
+        <video onmousemove="hover()" autoplay idmyVideo" src="https://www.googleapis.com/drive/v3/files/1vIHuov5jaThUfZocNhUYhoWRBfLLuAdj?alt=media&key=YOUR_API_KEY"></video>
     </div>
-    <div style="position:absolute;bottom:10px;">
-      
-        <i id="play" onclick="play()" class="material-icons" style="font-size: 40px;padding: 10px;">pause</i> 
-        <i onclick="replay(10)" class="material-icons" style="font-size: 40px;padding: 10px;">replay_10</i> 
-        <i onclick="replay(5)" class="material-icons" style="font-size: 40px;padding: 10px;">replay_5</i> 
 
-        <i id="volume" onclick="volume()" class="material-icons" style="font-size: 40px;padding: 10px;">volume_up</i> 
-        <a href="back.html"><img src="back.png" style="width: 40px; height: 40px; padding: 10px;"></a>
-          
-      
-
-
-
-        <span="font-weight: bold;position:absolute;bottom:10px;white-space: nowrap;padding: 10px;" id="nome" >black mirror</span>
-    </div>
-        <div style="right: 10px;position:absolute;bottom:10px;">
-            <div class="tooltip"><i class="material-icons" style="font-size: 40px;padding: 10px;">help_outline</i>
+    <div onmousemove="hover()" id="content" class="content">
+        <div class="chrome">
+            <input type="range" min="0" onchange="video_time_update();hover();" oninput="video_time_update();hover()" value="0" id="video_slider"/>
+        </div>
+        <div style="position:absolute; bottom:10px;">
+            <i id="play" onclick="play()" class="material-icons" style="font-size: 40px; padding: 10px;">pause</i> 
+            <i onclick="replay(10)" class="material-icons" style="font-size: 40px; padding: 10px;">replay_10</i> 
+            <i onclick="replay(5)" class="material-icons" style="font-size: 40px; padding: 10px;">replay_5</i> 
+            <i id="volume" onclick="volume()" class="material-icons" style="font-size: 40px; padding: 10px;">volume_up</i> 
+            <a href="back.html"><img src="back.png" style="width: 40px; height: 40px; padding: 10px;"></a>
+            <span="font-weight: bold; position: absolute; bottom:10px; white-space: nowrap; padding: 10px;" id="nome">Black Mirror</span>
+        </div>
+        <div="right: 10px; position: absolute; bottom:10px;">
+            <div class="tooltip">
+                <i class="material-icons" style="font-size: 40px; padding: 10px;">help_outline</i>
                 <span class="tooltiptext">Feito por <a href="https://github.com/pedroaf0">Pedroaf0</a></span>
-              </div>
-        <i class="material-icons" style="font-size: 40px;padding: 10px;">subtitles</i>  
-        <i id="full" onclick="full()" class="material-icons" style="font-size: 40px;padding: 10px;">fullscreen</i>
+            </div>
+            <i class="material-icons" style="font-size: 40px; padding: 10px;">subtitles</i>
+            <i id="full" onclick="full()" class="material-icons" style="font-size: 40px; padding: 10px;">fullscreen</i>
+        </div>
     </div>
-</div>
- 	
-<script>
-  
-// This is the "Offline page" service worker
 
-// Add this below content to your HTML page, or add the js file to your page at the very top to register service worker
+    <script>
+        // Show loading image while video is loading
+        document.getElementById("myVideo").addEventListener("loadstart", function() {
+            document.getElementById("loading").style.display = "block";
+        });
 
-// Check compatibility for the browser we're running this in
-if ("serviceWorker" in navigator) {
-  if (navigator.serviceWorker.controller) {
-    console.log("[PWA Builder] active service worker found, no need to register");
-  } else {
-    // Register the service worker
-    navigator.serviceWorker
-      .register("pwabuilder-sw.js", {
-        scope: "./"
-      })
-      .then(function (reg) {
-        console.log("[PWA Builder] Service worker has been registered scope: " + reg.scope);
-      });
-  }
-}
-</script>
-<script src="vibra.js"></script>
-<script src="js.js"></script>
+        document.getElementById("myVideo").addEventListener("loadeddata", function() {
+            document.getElementById("loading").style.display = "none";
+        });
 
+        // Add service worker
+        if ("serviceWorker" in navigator) {
+            if (navigator.serviceWorker.controller) {
+                console.log("[PWA Builder] Active service worker found, no need to register");
+            } else {
+                navigator.serviceWorker.register("pwabuilder-sw.js", { scope: "./" }).then(function (reg) {
+                    console.log("[PWA Builder] Service worker has been registered, scope: " + reg.scope);
+                }            }
+        }
+    </script>
+    <script src="vibra.js"></script>
+    <script src="js.js"></script>
 </body>
 </html>
