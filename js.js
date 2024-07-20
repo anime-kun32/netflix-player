@@ -1,5 +1,7 @@
 var video = document.getElementById("myVideo");
 var btn = document.getElementById("play");
+var ele_full = document.getElementById("full");
+var is_full = false;
 
 function play() {
   if (video.paused) {
@@ -10,33 +12,31 @@ function play() {
     btn.innerHTML = "play_arrow";
   }
 }
-var ele_full = document.getElementById("full");
-is_full = false;
-function full(){
-    if (is_full) {
-        closeFullscreen();
-        ele_full.innerHTML = "fullscreen";
-        is_full = false;
-      } else {
-        openFullscreen();
-       ele_full.innerHTML = "fullscreen_exit";
-        is_full = true;
-      }
-    }   
-    var time;
-        function hover(){
-            clearTimeout(time);
-           
-            document.getElementById("content").style.opacity = "1";
-            document.body.style.cursor = "default";
-            document.getElementById("overlay").style.display = "none";
-           time = setTimeout(function(){
-                                     document.getElementById("content").style.opacity = "0";
-                                     document.body.style.cursor = "none";
-                                    if (video.paused) document.getElementById("overlay").style.display = "block";
-                             }, 5000);
-            
-        }
+
+function full() {
+  if (is_full) {
+    closeFullscreen();
+    ele_full.innerHTML = "fullscreen";
+    is_full = false;
+  } else {
+    openFullscreen();
+    ele_full.innerHTML = "fullscreen_exit";
+    is_full = true;
+  }
+}
+
+var time;
+function hover() {
+  clearTimeout(time);
+  document.getElementById("content").style.opacity = "1";
+  document.body.style.cursor = "default";
+  document.getElementById("overlay").style.display = "none";
+  time = setTimeout(function() {
+    document.getElementById("content").style.opacity = "0";
+    document.body.style.cursor = "none";
+    if (video.paused) document.getElementById("overlay").style.display = "block";
+  }, 5000);
+}
 
 var elem = document.documentElement;
 function openFullscreen() {
@@ -64,61 +64,73 @@ function closeFullscreen() {
 }
 
 function getUrlVars() {
-    var vars = {};
-    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
-        vars[key] = value;
-    });
-    return vars;
-}
-video.volume = 1;
-function load_video(){
-    console.log(video.src);
-    console.log(getUrlVars()["v"]);
-    console.log(getUrlVars()["mudo"]);
-    
-    if (getUrlVars()["v"] != undefined) video.src = getUrlVars()["v"];
-    if (getUrlVars()["mudo"] != undefined) video.volume = 0;
-    if (getUrlVars()["nome"] != undefined){ 
-        document.getElementById("nome").innerHTML = decodeURI(getUrlVars()["nome"]);
-        document.getElementById("nome2").innerHTML = decodeURI(getUrlVars()["nome"]);
-        document.title = "Netflix - "+decodeURI(getUrlVars()["nome"]);
-      }
-      
+  var vars = {};
+  var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+    vars[key] = value;
+  });
+  return vars;
 }
 
-function volume(){
-    if (video.volume == 0) {
-        video.volume = 1;
-        document.getElementById("volume").innerHTML = "volume_up";
-      } else {
-        video.volume = 0;
-        document.getElementById("volume").innerHTML = "volume_off";
-      }  
-}
-function replay(n){
-    video.currentTime -= n;
-}
-function key()
-	{
-		if (event.keyCode == '32')
-		{
-      play();
-      hover();
-		}
+video.volume = 1;
+function loadVideo() {
+  console.log(video.src);
+  console.log(getUrlVars()["v"]);
+  console.log(getUrlVars()["mudo"]);
+  
+  if (getUrlVars()["v"] != undefined) {
+    video.src = getUrlVars()["v"];
   }
-  // .firefox
+  if (getUrlVars()["track"] != undefined) {
+    var trackUrl = getUrlVars()["track"];
+    convertVTTtoJSON(trackUrl).then(captionsJson => {
+      const webVTTString = captionsJson.map(caption => `${caption.start} --> ${caption.end}\n${caption.text}`).join('\n\n');
+      const blob = new Blob([webVTTString], { type: 'text/vtt' });
+      const trackElement = document.getElementById('subtitles');
+      trackElement.src = URL.createObjectURL(blob);
+    });
+  }
+  if (getUrlVars()["mudo"] != undefined) {
+    video.volume = 0;
+  }
+  if (getUrlVars()["nome"] != undefined) { 
+    document.getElementById("nome").innerHTML = decodeURI(getUrlVars()["nome"]);
+    document.getElementById("nome2").innerHTML = decodeURI(getUrlVars()["nome"]);
+    document.title = "Netflix - " + decodeURI(getUrlVars()["nome"]);
+  }
+}
+
+function volume() {
+  if (video.volume == 0) {
+    video.volume = 1;
+    document.getElementById("volume").innerHTML = "volume_up";
+  } else {
+    video.volume = 0;
+    document.getElementById("volume").innerHTML = "volume_off";
+  }  
+}
+
+function replay(n) {
+  video.currentTime -= n;
+}
+
+function key() {
+  if (event.keyCode == '32') {
+    play();
+    hover();
+  }
+}
+
 var isFF = true;
 var addRule = (function (style) {
   var sheet = document.head.appendChild(style).sheet;
   return function (selector, css) {
-    if ( isFF ) {
-      if ( sheet.cssRules.length > 0 ) {
-        sheet.deleteRule( 0 );
+    if (isFF) {
+      if (sheet.cssRules.length > 0) {
+        sheet.deleteRule(0);
       }
-    
       try {
         sheet.insertRule(selector + "{" + css + "}", 0);
-      } catch ( ex ) {
+      } catch (ex) {
         isFF = false;
       }
     }    
@@ -126,20 +138,38 @@ var addRule = (function (style) {
 })(document.createElement("style"));
 
 var video_slider = document.getElementById("video_slider");
-function video_time_update(){
+function video_time_update() {
   slider_css();
   video.currentTime = video_slider.value;
 }
 
 function slider_css() {
-  
-    x = (video_slider.value * 100) / video_slider.max;
-    video_slider.style = 'background: linear-gradient(to right, red 0% ' + x + '%, #fff ' + x + '%, white 100%) '
-  };
+  x = (video_slider.value * 100) / video_slider.max;
+  video_slider.style = 'background: linear-gradient(to right, red 0% ' + x + '%, #fff ' + x + '%, white 100%) ';
+}
 
-
-video.ontimeupdate = function(){
+video.ontimeupdate = function() {
   video_slider.max = Math.round(video.duration);
   video_slider.value = Math.round(video.currentTime);
-  slider_css(); 
+  slider_css();
 }
+
+// Function to fetch VTT file and convert it to JSON
+function convertVTTtoJSON(vttUrl) {
+  return fetch(vttUrl)
+    .then(response => response.text())
+    .then(vttText => {
+      return vttText
+        .split(/\r?\n\r?\n/)
+        .filter(Boolean)
+        .map(part => {
+          const [time, ...textLines] = part.split('\n');
+          const [start, end] = time.split(' --> ');
+          return { start, end, text: textLines.join(' ') };
+        });
+    })
+    .catch(error => console.error('Error fetching or parsing VTT file:', error));
+}
+
+// Load the video on page load
+window.onload = loadVideo;
